@@ -80,6 +80,10 @@ If you find this code useful in your research, please consider citing our prepri
 ### アプリケーションの使い方
 
 
+https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
+
+
+
 ### 計算における重要な前提条件
 **回折効率（DE）の算出について：**
 本シミュレーションでは、LCOSデバイスの実態に合わせた物理モデル（振幅反射率 a=1.0）を前提としています。回折効率を算出する際、分母に `sum_input + reference_energy` を使用するのではなく、強度ホログラム `I(x)` の総和である `sum(I)` を分母として計算しています。追試を行う際はこの条件にご留意ください。

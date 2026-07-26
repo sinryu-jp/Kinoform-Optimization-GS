@@ -30,8 +30,8 @@ by Masataka TOZUKA (Former Shonan Institute of Technology).
 ### About the dataset
 For the large‑scale evaluation of this simulation, we use the MIT‑CGH‑4K dataset.
 Because the full set of 4,000 images has a large file size, it is not included in this repository (only a few sample images for functionality checks are stored in the data/ directory).
-To perform a complete reproduction of the experiments, please download the dataset from the official website below, place all images into the data/ folder, and then run the program.
-- MIT-CGH-4K Dataset: https://github.com/LiangShi-MIT/TensorHolography
+To perform a complete reproduction of the experiments, please download the dataset （`/*_192`）from the official website below, place all images into the data/ folder, and then run the program.
+- MIT-CGH-4K Dataset: https://github.com/liangs111/tensor_holography
 
 ### Important Notes on Calculation
 **Diffraction Efficiency (DE):** 
@@ -74,8 +74,8 @@ If you find this code useful in your research, please consider citing our prepri
 本シミュレーションの大規模な評価には、MIT-CGH-4K データセットを使用しています。
 データセットの全画像（4,000枚）はファイルサイズが大きいため、本リポジトリには含まれていません（動作確認用の数枚のみ `data/` に格納しています）。
 
-完全な追試を行う場合は、以下の公式サイトからデータセットをダウンロードし、画像を `data/` フォルダ内に配置してからプログラムを実行してください。
-- MIT-CGH-4K Dataset: https://github.com/LiangShi-MIT/TensorHolography
+完全な追試を行う場合は、以下の公式サイトからデータセット（`/*_192`）をダウンロードし、画像を `data/` フォルダ内に配置してからプログラムを実行してください。
+- MIT-CGH-4K Dataset: https://github.com/liangs111/tensor_holography
 
 ### アプリケーションの使い方
 

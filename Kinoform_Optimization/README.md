@@ -48,6 +48,7 @@ If you find this code useful in your research, please consider citing our prepri
   url={ https://jxiv.jst.go.jp/index.php/jxiv/preprint/view/5311 }
 }
 ```
+（※URL：https://jxiv.jst.go.jp/index.php/jxiv/preprint/view/5311 ）
 
 <a id="japanese"></a>
 ## 日本語
@@ -90,4 +91,5 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
 
 ### 引用について
 本コードを研究等で活用される場合は、Jxivにて公開中のプレプリントの引用をお願いいたします。
+
 （※URL：https://jxiv.jst.go.jp/index.php/jxiv/preprint/view/5311 ）

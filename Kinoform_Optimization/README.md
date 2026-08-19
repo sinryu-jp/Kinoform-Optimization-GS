@@ -49,14 +49,16 @@ If you find this code useful in your research, please consider citing our prepri
 }
 ```
 （※URL：https://jxiv.jst.go.jp/index.php/jxiv/preprint/view/5311 ）
-
 ## Update History
 * **2026-08-01**
   * **Bug Fix:** Fixed an incorrect denominator in the loop's average calculation (changed the divisor from 4001 to 4000).
   * **Performance Improvement:** Removed unused functions to reduce function call overhead.
   * **Improved Readability:** Standardized variable usage and revised/added English comments in the source code.
   * **File Update:** Updated the executable files to the latest version (TxtOnly0801a.exe / ImgDisp0801a.exe).
-
+* **2026-08-20**
+  * **Improved Readability:** By modularizing and standardizing the diffraction efficiency (DE) calculation into the calculateDiffractionEfficiencyWithMask function, code readability and the maintainability of the evaluation logic have been significantly improved.
+  *  **File Update:** Updated the executable files to the latest version (TxtOnly0820a.exe / ImgDisp0820a.exe).
+    
 <a id="japanese"></a>
 ## 日本語
 
@@ -107,4 +109,6 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
   * **パフォーマンス改善:** 未使用の関数を削除し、関数呼び出しのオーバーヘッドを削減しました。
   * **コードの可読性向上:** 変数の使用方法を統一し、ソースコード内の英語コメントを加筆・修正しました。
   * **ファイル更新:** 実行ファイル名を最新版（TxtOnly0801a.exe / ImgDisp0801a.exe）に更新しました。
-
+* **2026-08-20**
+  * **コードの可読性向上:** 回折効率（DE: Diffraction Efficiency）の算出処理を calculateDiffractionEfficiencyWithMask 関数として共通化・モジュール化したことで、コードの可読性および評価ロジックの保守性が大幅に向上しました。
+  * **ファイル更新:** 実行ファイル名を最新版（TxtOnly0820a.exe / ImgDisp0820a.exe）に更新しました。

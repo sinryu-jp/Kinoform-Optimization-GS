@@ -45,21 +45,25 @@ using namespace std;
 #define MODE_CUT 0
 //0: Enable the display command.
 //1: Disable the display command.
-#define DISP_CUT 0
+#define DISP_CUT 1
 
 static string FileNameBMP[10];
 
 
 // ==========================================================
-// Standard SSIM computation function (for AI paper comparison: K1=0.01, K2=0.03)
-// Arguments i1, i2 are expected to be 8-bit images (CV_8U, 0-255) or 64F images
-// ==========================================================
-// ==========================================================
-// Common SSIM computation function
-// C1, C2 can be specified as arguments (default is standard SSIM: L=255, K1=0.01, K2=0.03)
-//   - Standard SSIM (8-bit 0-255 image): C1=6.5025, C2=58.5225
-//   - Prof. Yoshikawa's constants (0-1 image): C1=0.01, C2=0.03
-// depth is the internal computation precision (CV_32F or CV_64F)
+// Common SSIM Computation Function
+//
+// Computes the Structural Similarity Index (SSIM) between two images (i1, i2).
+// Constants C1 and C2 can be configured based on the evaluation criteria:
+//   - Standard SSIM (8-bit [0, 255] scale, L=255, K1=0.01, K2=0.03):
+//       C1 = (K1 * L)^2 = 6.5025,  C2 = (K2 * L)^2 = 58.5225
+//   - Prof. Yoshikawa's criteria (Normalized [0, 1] scale):
+//       C1 = 0.01,  C2 = 0.03
+//
+// @param i1, i2 Input images (CV_8U or CV_64F).
+// @param C1, C2 Stabilization constants (default: Standard SSIM for 8-bit).
+// @param depth  Internal computation precision (CV_32F or CV_64F).
+// @return cv::Scalar Mean SSIM value across channels.
 // ==========================================================
 cv::Scalar computeSSIM(const cv::Mat& i1, const cv::Mat& i2,
 	double C1 = 6.5025, double C2 = 58.5225, int depth = CV_64F)
@@ -983,83 +987,6 @@ std::string getDesktopWKCGHFolder() {
 	return "";
 }
 
-double calculateDiffractionEfficiencyStrictMAIN(const cv::Mat& WkP, const cv::Mat& inputImage, int curSize) {
-
-	cv::Mat img_ROI;//Target image
-
-	// --- 2. Create the mask image ---
-	cv::Mat mask_8u;
-	// 1. Create a mask image (non-zero becomes 1, zero stays 0)
-	mask_8u = (inputImage != 0.0);
-	int borderSize = 1; // Mask border size
-	mask_8u = mask_8u(cv::Rect(borderSize, borderSize, mask_8u.cols - 2 * borderSize, mask_8u.rows - 2 * borderSize)).clone();
-	cv::copyMakeBorder(mask_8u, mask_8u, borderSize, borderSize, borderSize, borderSize, cv::BORDER_CONSTANT, cv::Scalar(255));
-
-	// 2. Apply the mask to the target image
-	mask_8u.convertTo(img_ROI, CV_8U, 255);//Copy the target image
-#if MODE_CUT == 0
-#if DISP_CUT == 0
-#pragma omp critical(gui)           // Added
-	cv::imshow("MASK", img_ROI);
-#endif // DISP_CUT
-#endif //  MODE_CUT	
-	cv::Mat mask_64F;
-	img_ROI.convertTo(mask_64F, CV_64F, 1.0 / 255.0);
-
-	// --- [Inside the main loop: reconstruction process after hologram generation] ---
-
-	// 1. Map the interference fringe pattern WkP to the phase distribution phi(u,v)
-	// Adjust the scale to match the device's maximum phase modulation depth (e.g. 2.19*pi)
-	double phaseModulationDepth = 2.0 * CV_PI;
-	cv::Mat phi = WkP.clone();
-	cv::normalize(phi, phi, 0, phaseModulationDepth, cv::NORM_MINMAX);
-
-	// 2. Create the complex hologram plane based on the physical model (a=1)
-	cv::Mat holoComplex(curSize, curSize, CV_64FC2);
-	cv::Mat holoPlanes[2];
-	holoPlanes[0] = cv::Mat::ones(curSize, curSize, CV_64F); // Amplitude reflectance a = 1.0
-	holoPlanes[1] = cv::Mat::zeros(curSize, curSize, CV_64F);
-
-	// Compute the complex exponential exp(-j * phi)
-	for (int y = 0; y < curSize; y++) {
-		for (int x = 0; x < curSize; x++) {
-			double p = phi.at<double>(y, x);
-			holoPlanes[0].at<double>(y, x) = cos(p);  // Real part
-			holoPlanes[1].at<double>(y, x) = -sin(p); // Imaginary part (matched to the conjugate image direction)
-		}
-	}
-	cv::merge(holoPlanes, 2, holoComplex);
-
-	// 3. Perform physical IFFT (apply scale to preserve energy)
-	cv::Mat reconComplex;
-	cv::dft(holoComplex, reconComplex, cv::DFT_INVERSE | cv::DFT_SCALE | cv::DFT_COMPLEX_OUTPUT);
-
-	// 4. Compute the diffraction efficiency (DE) (using raw data before brightness correction)
-	// --- Below: strict diffraction efficiency computation based on the physical model (Parseval's theorem) ---
-	// 4-1. Compute intensity (squared amplitude) for each pixel
-	cv::Mat reconPlanes[2];
-	cv::split(reconComplex, reconPlanes);
-	cv::Mat intensityMat;
-	cv::magnitude(reconPlanes[0], reconPlanes[1], intensityMat);
-	cv::multiply(intensityMat, intensityMat, intensityMat); // Intensity I = |U|^2
-
-	// 4-2. Numerator: total energy within the signal region (ROI)
-	cv::Mat maskedIntensity;
-	cv::multiply(intensityMat, mask_64F, maskedIntensity);
-	double energyROI = cv::sum(maskedIntensity)[0];
-
-	// 4-3. Denominator: total energy of the entire reconstructed image (equal to the total SLM reflected light by Parseval's theorem)
-	double energyTotal = cv::sum(intensityMat)[0];
-
-	if (energyTotal <= 0) return 0.0;
-
-	// 4-4. Compute the ratio (mathematically never exceeds 100%)
-	double Mde_strict = (energyROI / energyTotal) * 100.0;
-
-	return Mde_strict;
-}
-
-
 string MITImg_Read(string FILE_DTOP, string FileName, Mat& grayImage, int curSize, int BLK)
 {
 	string FName_END = "NULL";
@@ -1331,7 +1258,6 @@ EvalResults evaluateHologram(
 	Mat& COPYtarget_mat_S_256,
 	int NsLoop,
 	double Mde_physics,
-	double Mde_strict,
 	string FILE_DTOP,
 	int WKKK,
 	string inputCom)
@@ -1365,7 +1291,7 @@ EvalResults evaluateHologram(
 		Hdata[3][NsLoop + 1] = ssim[0];
 		Hdata[6][NsLoop + 1] = ssim_standard;
 		Hdata[4][NsLoop + 1] = Mde_out;
-		Hdata[5][NsLoop + 1] = Mde_strict;
+		Hdata[5][NsLoop + 1] = Mde_out;
 	}
 
 	// ===== Console output: protected by critical(console) =====
@@ -1393,12 +1319,12 @@ EvalResults evaluateHologram(
 		std::cout << " Yoshikawa's Criterion SSIM=" << ssim[0]<<"("<< ssim_standard<<")";
 
 		std::cout << std::fixed << std::setprecision(2);
-		std::cout << " DE " << Mde_out << "(" << Mde_strict << ")%" << std::endl;
+		std::cout << " DE " << Mde_out << "%" << std::endl;
 		SetConsoleColor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 #endif
 	}
 
-	res.de = Mde_strict;
+	res.de = Mde_out;
 	res.psnr = w;
 	res.ssim = ssim[0];
 	return res;
@@ -1493,7 +1419,7 @@ void aggregateMITResults(int WKKK, const string& FILE_DTOP, const string& inputC
 	std::cout << " PSNR:" << count[0] << ",Z " << ZEROcount[0]
 		<< " PSNR-HVS:" << count[1] << ",Z " << ZEROcount[1]
 		<< " PSNR-HVSM:" << count[2] << ",Z " << ZEROcount[2]
-		<< " SSIM,DE:" << count[2] << " \n";
+		<< " SSIM,DE:" << count[3] << "," << count[4] << " \n";
 
 	for (int i = 0; i < 7; i++) { count[i] = 0; ZEROcount[i] = 0; }
 
@@ -1506,8 +1432,9 @@ void aggregateMITResults(int WKKK, const string& FILE_DTOP, const string& inputC
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << "  SSIM(Yoshikawa's Criterion)= " << avg[3] << "  SSIM(Standard AI Criterion)= " << avg[6];
 	std::cout << std::fixed << std::setprecision(2);
-	if (avg[4] == 100) std::cout << "   DE  100 (" << avg[5] << ")% ";
-	else               std::cout << "   DE  " << avg[4] << " (" << avg[5] << ")% ";
+	//if (avg[4] == 100) std::cout << "   DE  100 % ";
+	//else               std::cout << "   DE  " << avg[4] << " % ";
+	std::cout << "   DE  " << avg[4] << " % ";
 	std::cout << "Average" << std::endl;
 
 	// --- Hdata[0] single histogram ---
@@ -1601,10 +1528,10 @@ int histogramMAIN(Mat& COPYtarget_mat_M_256, Mat& COPYtarget_mat_S_256, Mat& int
 
 Mat Img_IFFT(Mat & WkP, int curSize)
 {
-	Mat re = Mat_<double>(curSize, curSize);
-	Mat im = Mat_<double>(curSize, curSize);
+	Mat re = Mat_<double>(curSize, curSize);// Real part
+	Mat im = Mat_<double>(curSize, curSize);// Imaginary part
 	Mat complexImage = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64FC2); // 2-channel double image
-	Mat planes[] = { re.clone(), im.clone() };
+	Mat planes[] = { re.clone(), im.clone() };// Split into 2 channels for complex representation
 
 /***************************************************************************************/
 	// --- Convert from amplitude type to phase-only type ---
@@ -1788,131 +1715,100 @@ void Disp_Save_img(string FName_all, Mat& COPYtarget_mat_M_256, Mat& COPYtarget_
 #endif // MODE_CUT
 	return;
 }
-// enum class for selecting the calculation method
-enum class DE_Method {
-	PAPER_METHOD,      // Method described in the paper (may exceed 100%)
-	//PHYSICS_BASED,     // Physics-based (object light + reference light) method (recommended)
-	PARSEVAL_BASED,    // Method based on Parseval's theorem
-	PHYSICS_BASED    // Reference light energy (assuming collimated light with intensity 1.0)
-};
-
-
 /**
- * @brief Calculates the diffraction efficiency of the hologram using a mask image.
- * @param inputObjectImage The original input image (object light, CV_64F).
- * @param reconstructedComplexImage The complex reconstructed image after the Fourier transform (CV_64FC2).
- * @param mask A mask image indicating the target region (CV_64F, values 0.0 and 1.0).
- * @param method Specifies the calculation method (DE_Method).
- * @return The calculated diffraction efficiency (%).
+ * @brief Calculates the diffraction efficiency (DE) of a phase-only hologram using a signal ROI mask.
+ * @param inputObjectImage The reference input image (CV_64F) used to create the ROI mask.
+ * @param holoForDE The quantized phase hologram pattern (CV_64F, 0.0-1.0).
+ * @param curSize Matrix dimension (e.g., 256 or 384).
+ * @return Diffraction efficiency (DE) in percentage (%).
  */
 double calculateDiffractionEfficiencyWithMask(
 	const cv::Mat& inputObjectImage,
-	const cv::Mat& reconstructedComplexImage,
-	const cv::Mat& DEmask, // Receives a mask instead of a Rect
-	DE_Method method,
+	const cv::Mat& holoForDE,
 	int curSize)
 {
-	// --- Numerator: compute the total intensity of the "target region D" of the reconstructed image ---
-	Mat re = Mat_<double>(curSize, curSize);
-	Mat im = Mat_<double>(curSize, curSize);
-	Mat DEchannels[] = { re.clone(), im.clone() };
-
-	cv::split(reconstructedComplexImage, DEchannels);
-	cv::Mat total_intensity_mat;
-	cv::magnitude(DEchannels[0], DEchannels[1], total_intensity_mat);
-	cv::multiply(total_intensity_mat, total_intensity_mat, total_intensity_mat);
-
-	cv::Mat masked_intensity;
-	cv::multiply(total_intensity_mat, DEmask, masked_intensity);
-
-	const double total_intensity_reconstructed_D = cv::sum(masked_intensity)[0];
-
+	cv::Mat holoPlanesDE[2];
+	cv::Mat holoComplexForDE;
+	cv::Mat reconstructedComplexForDE;
+	cv::Mat mask_8u_de;
+	cv::Mat mask_64F_de;
+	double total_intensity_reconstructed_D = 0.0;
+	double phaseModulationDepth = 2.0 * CV_PI;
 	// --- Denominator calculation ---
 	double total_input_energy = 0.0;
 
-	// For logging: sum_input = sum(input^2)
-	double sum_input = 0.0;
-	if (!inputObjectImage.empty()) {
-		cv::Mat input_intensity;
-		cv::multiply(inputObjectImage, inputObjectImage, input_intensity);
-		sum_input = cv::sum(input_intensity)[0];
-	}
-	// For intensity holograms: sum_holo_intensity = sum(I_holo)
-	// Note: reconstructedComplexImage is the "reconstructed image", but for convenience
-	//    this can be used when switching to an operation mode where the main side
-	//    passes the I(x) hologram directly as a complex value (real part=I, imaginary part=0).
-	//    Kept for logging purposes even when unused.
-	double sum_holo_intensity = 0.0;
-	{
-		std::vector<cv::Mat> ch(2);
-		cv::split(reconstructedComplexImage, ch);
-		// In the intensity-hologram operation mode, the real part is assumed to hold I(x)
-		sum_holo_intensity = cv::sum(ch[0])[0];
-	}
-	// For logging: sum_total_intensity = sum(|reconstructed|^2)
-	const double sum_total_intensity = cv::sum(total_intensity_mat)[0];
+	// --- 2. Create the mask image ---
+	// 1. Create a mask image (non-zero becomes 255, zero stays 0)
+	mask_8u_de = (inputObjectImage != 0.0);
+	int borderSize = 1; // Mask border size
+	mask_8u_de = mask_8u_de(cv::Rect(borderSize, borderSize, mask_8u_de.cols - 2 * borderSize, mask_8u_de.rows - 2 * borderSize)).clone();
+	cv::copyMakeBorder(mask_8u_de, mask_8u_de, borderSize, borderSize, borderSize, borderSize, cv::BORDER_CONSTANT, cv::Scalar(255));
+	// 2. Apply the mask to the target image
+	mask_8u_de.convertTo(mask_64F_de, CV_64F, 1.0 / 255.0);
 
-	double reference_energy = 0.0;
-
-	switch (method) {
-	case DE_Method::PAPER_METHOD:
-	{
-		total_input_energy = sum_input;
-		break;
-	}
-
-	case DE_Method::PHYSICS_BASED:
-	{
-		// Fix: total energy of the incident light (assumed plane wave)
-		// Assume light with intensity 1.0 is incident over an area of curSize * curSize
-		//reference_energy = static_cast<double>(inputObjectImage.rows * inputObjectImage.cols);
-		total_input_energy = 1.0;// reference_energy;
-		break;
-	}
-	case DE_Method::PARSEVAL_BASED:
-	{
-		total_input_energy = sum_total_intensity;
-		break;
-	}
-	}
-
-	if (total_input_energy == 0.0) {
-		return 0.0;
-	}
-
-	// --- Additional log (PHYSICS_BASED only) ---
 #if MODE_CUT == 0
-#if DISP_CUT == 0 
-
-		// Thin out output if it is too frequent (e.g., once every 100 calls)
-	static std::atomic<int> s_logCounter(0);
-	const bool doLog = ((s_logCounter.fetch_add(1) % 100) == 0);
-
-	if (doLog) {
-		std::ios::fmtflags cur = std::cout.flags();
-		std::cout << std::fixed << std::setprecision(6);
-
-		std::cout
-			<< "[DE-PHYS] sum_input=" << sum_input
-			<< " reference_energy=" << reference_energy
-			<< " denom(sum_input+ref)=" << total_input_energy
-			<< " sum_holo_intensity=" << sum_holo_intensity
-			<< " sum_total_intensity=" << sum_total_intensity
-			<< " sum_D=" << total_intensity_reconstructed_D
-			<< " ratio(sum_total/denom)=" << (sum_total_intensity / total_input_energy)
-			<< " ratio(D/denom)=" << (total_intensity_reconstructed_D / total_input_energy)
-			<< std::endl;
-
-		std::cout.flags(cur);
+#if DISP_CUT == 0
+#pragma omp critical(gui)
+	{
+		cv::Mat img_ROI_de;
+		mask_8u_de.convertTo(img_ROI_de, CV_8U, 255);
+		cv::imshow("MASK", img_ROI_de);
 	}
-	//}
-#endif
-#endif
+#endif // DISP_CUT
+#endif // MODE_CUT
+
+	// 1. Map the interference fringe pattern WkP to the phase distribution phi(u,v)
+	// Adjust the scale to match the device's maximum phase modulation depth (e.g. 2.19*pi)
+	cv::Mat phiDE = holoForDE.clone();
+	cv::normalize(phiDE, phiDE, 0, phaseModulationDepth, cv::NORM_MINMAX);
+
+	cv::Mat magDE = cv::Mat::ones(holoForDE.size(), CV_64F);// Amplitude reflectance a = 1.0
+	cv::Mat reDE, imDE;// Real and imaginary parts
+	// Compute the complex exponential exp(+j * phi)
+	cv::polarToCart(magDE, phiDE, reDE, imDE);// Convert from polar to Cartesian coordinates
+// Compute the complex exponential exp(-j * phi)
+/*etc
+for (int y = 0; y < curSize; y++) {
+	for (int x = 0; x < curSize; x++) {
+		double p = phiDE.at<double>(y, x);
+		holoPlanesDE[0].at<double>(y, x) = cos(p);  // Real part
+		holoPlanesDE[1].at<double>(y, x) = -sin(p); // Imaginary part (matched to the conjugate image direction)
+	}
+}
+*/
+	holoPlanesDE[0] = reDE;// Real part
+	holoPlanesDE[1] = imDE;// Imaginary part
+	cv::merge(holoPlanesDE, 2, holoComplexForDE);
+
+	// 3. Perform physical IFFT (apply scale to preserve energy)
+	cv::dft(holoComplexForDE, reconstructedComplexForDE, cv::DFT_INVERSE | cv::DFT_SCALE | cv::DFT_COMPLEX_OUTPUT);
+
+	// 4. Compute the diffraction efficiency (DE) (using raw data before brightness correction)
+	// --- Below: strict diffraction efficiency computation based on the physical model (Parseval's theorem) ---
+	// 4-1. Compute intensity (squared amplitude) for each pixel
+
+	// --- Numerator: compute the total intensity of the "target region D" of the reconstructed image ---
+	Mat re = Mat_<double>(curSize, curSize);// Real part
+	Mat im = Mat_<double>(curSize, curSize);// Imaginary part
+	Mat DEchannels[] = { re.clone(), im.clone() };// Split into 2 channels for complex representation
+
+	cv::split(reconstructedComplexForDE, DEchannels);
+	cv::Mat total_intensity_mat;
+	cv::magnitude(DEchannels[0], DEchannels[1], total_intensity_mat);
+	cv::multiply(total_intensity_mat, total_intensity_mat, total_intensity_mat);
+	// 4-2. Numerator: total energy within the signal region (ROI)
+	cv::Mat masked_intensity;
+	cv::multiply(total_intensity_mat, mask_64F_de, masked_intensity);
+	// 4-3. Denominator: total energy of the entire reconstructed image (equal to the total SLM reflected light by Parseval's theorem)
+	total_intensity_reconstructed_D = cv::sum(masked_intensity)[0];
+
+	// Fix: total energy of the incident light (assumed plane wave)
+	// Assume light with intensity 1.0 is incident over an area of curSize * curSize
+	//reference_energy = static_cast<double>(inputObjectImage.rows * inputObjectImage.cols);
+	total_input_energy = 1.0;// reference_energy;
+	// 4-4. Compute the ratio (mathematically never exceeds 100%)
 	return (total_intensity_reconstructed_D / total_input_energy) * 100.0;
 }
-
-
-
 
 double REminVal, REmaxVal;
 double IMminVal, IMmaxVal;
@@ -2093,10 +1989,10 @@ int main(int argc, char* argv[])
 			}
 #endif
 
-			grayImage.convertTo(inputImage, CV_64F, 1.0 / 255.0);
-			WkP = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64F);
-			re = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64F);
-			im = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64F);
+			grayImage.convertTo(inputImage, CV_64F, 1.0 / 255.0);// Convert to CV_64F and scale to 0.0-1.0
+			WkP = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64F);// Initialize WkP to zeros
+			re = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64F);// Real part
+			im = cv::Mat::zeros(cv::Size(curSize, curSize), CV_64F);// Imaginary part
 
 			Img_FFT(NsLoop, inputImage, re, im, complexImage, planes, Trans, curSize);
 
@@ -2218,54 +2114,32 @@ int main(int argc, char* argv[])
 			// === End of GS method ===
 			// From here: quantize WkP to bitDepth to generate img_CGH (hologram for display/DE evaluation)
 
-			double scalingFactor = 1.0;
-			double bitDepth = 8.0;
-			normalize(WkP, WkP, 0.0, 1.0, NORM_MINMAX);
-			double numLevels = std::pow(2.0, bitDepth) - 1.0f;
-			WkP.convertTo(WkP, CV_64F, numLevels);
-			WkP += 0.5;
-			if (bitDepth <= 8.0)
+			double scalingFactor = 1.0;// Scaling factor for diffraction efficiency evaluation
+			double bitDepth = 8.0;// Bit depth for quantization (8-bit or 16-bit)
+			normalize(WkP, WkP, 0.0, 1.0, NORM_MINMAX);// Normalize to 0-1
+			double numLevels = std::pow(2.0, bitDepth) - 1.0f;// Number of quantization levels (e.g., 255 for 8-bit, 65535 for 16-bit)
+			WkP.convertTo(WkP, CV_64F, numLevels);// Scale to 0-255 (8-bit) or 0-65535 (16-bit)
+			WkP += 0.5;// Add 0.5 for rounding
+			if (bitDepth <= 8.0)// If bit depth is 8 or less, convert to CV_8U; otherwise, convert to CV_16U
 				WkP.convertTo(img_CGH, CV_8U);
 			else
 				WkP.convertTo(img_CGH, CV_16U);
-			scalingFactor = numLevels;
+			scalingFactor = numLevels;// Update scaling factor
 
 			cv::Mat holoForDE;
 			img_CGH.convertTo(holoForDE, CV_64F);
 			if (scalingFactor != 1.0 && scalingFactor != 0.0)
-				holoForDE /= scalingFactor;
-			cv::Mat phiDE = holoForDE * 2.0 * CV_PI;
-			cv::Mat magDE = cv::Mat::ones(holoForDE.size(), CV_64F);
-			cv::Mat reDE, imDE;
-			cv::polarToCart(magDE, phiDE, reDE, imDE);
-			cv::Mat holoPlanesDE[] = { reDE, imDE };
-			cv::Mat holoComplexForDE;
-			cv::merge(holoPlanesDE, 2, holoComplexForDE);
-			cv::Mat reconstructedComplexForDE;
-			cv::dft(holoComplexForDE, reconstructedComplexForDE, cv::DFT_INVERSE | cv::DFT_SCALE | cv::DFT_COMPLEX_OUTPUT);
-			cv::Mat mask_8u_de = (inputImage != 0.0);
-			cv::Mat mask_64F_de;
-			mask_8u_de.convertTo(mask_64F_de, CV_64F, 1.0 / 255.0);
-#if  MODE_CUT == 0
-#if DISP_CUT == 0
-#pragma omp critical(gui)
-			{
-				cv::Mat img_ROI_de;
-				mask_8u_de.convertTo(img_ROI_de, CV_8U, 255);
-				cv::imshow("MASK", img_ROI_de);
-			}
-#endif // DISP_CUT
-#endif // MODE_CUT
-			double Mde_physics = calculateDiffractionEfficiencyWithMask(inputImage, reconstructedComplexForDE, mask_64F_de, DE_Method::PHYSICS_BASED, curSize);
-			double Mde_strict = calculateDiffractionEfficiencyStrictMAIN(holoForDE, inputImage, curSize);
-
+				holoForDE /= scalingFactor;// Scale back to 0-1 for diffraction efficiency evaluation
+			// Strict diffraction efficiency based on the physical model (Parseval's theorem)
+			double Mde_physics = calculateDiffractionEfficiencyWithMask(inputImage, holoForDE, curSize);
+			
 			cv::Mat intensity_roi = Mat_<double>(curSize, curSize);
 			intensity_roi = Img_IFFT(holoForDE, curSize);
 			cv::multiply(intensity_roi, intensity_roi, intensity_roi);
 			cv::normalize(intensity_roi, intensity_roi, 0.0, 1.0, cv::NORM_MINMAX);
 			intensity_roi.convertTo(img_all, CV_8U, 255);
 
-			int border = BLK;
+			int border = BLK;// The border size for cropping the signal region (1 pixel)
 			Mat COPYtarget_mat_M_BLK(cv::Size(curSize - BLK * 2, (curSize / 2) - BLK * 2), CV_8U);
 			Mat COPYtarget_mat_M_256(cv::Size(curSize, (curSize / 2)), CV_8U);
 			grayImage.rowRange(0, (curSize / 2)).copyTo(img_Mst);
@@ -2305,12 +2179,13 @@ int main(int argc, char* argv[])
 
 			// [Step4]
 #pragma omp critical(console)
-			{ std::cout << "Deff_median:" << Deff_median_OUT; }
+			{
+				std::cout << "Deff_median(" << Deff_median_OUT << ") ";
+			} //<< std::endl; }
 
 			// evaluateHologram is called as-is (it uses critical internally)
 			evaluateHologram(COPYtarget_mat_M_256, COPYtarget_mat_S_256,
-				NsLoop, Mde_physics, Mde_strict,
-				FILE_DTOP, WKKK, inputCom);
+				NsLoop, Mde_physics,FILE_DTOP, WKKK, inputCom);
 
 			// Disp_Save_img (may include imshow) is protected with critical
 #pragma omp critical(filesave)
@@ -2331,11 +2206,11 @@ int main(int argc, char* argv[])
 		}
 		// ===== Aggregate on a single thread after the parallel loop ends =====
 
-// (B) Average aggregation of 8 photos (previously the NsLoop==7 block)
-		aggregatePhotoResults();
+        // (B) Average aggregation of 8 photos (previously the NsLoop==7 block)
+		aggregatePhotoResults();// Aggregate the results of 8 photos
 
 		// (C) Average aggregation of MIT images + imwrite (previously the trailing block)
-		aggregateMITResults(WKKK, FILE_DTOP, inputCom);
+		aggregateMITResults(WKKK, FILE_DTOP, inputCom);// Aggregate the results of MIT images
 
 		DWORD elapsed = (timeGetTime() - start);
 		std::cout << "t=" << elapsed << "ms.(" << (elapsed / 1000.0) << "sec. " << (elapsed / 60000.0) << "min.) / " << (NloopMIT + Image0to7) << " = " << (elapsed / 1000.0) / (NloopMIT + Image0to7) << "sec[" << 1.0 / ((elapsed / 1000.0) / (NloopMIT + Image0to7)) << "fps]\n";

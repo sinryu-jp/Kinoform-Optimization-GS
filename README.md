@@ -38,7 +38,23 @@ To perform a complete reproduction of the experiments, please download the datas
 In this simulation, the physical model of the LCOS device is assumed to have an amplitude reflectance of a=1.0. When calculating the diffraction efficiency, the total sum of the intensity hologram `sum(I)` is used as the denominator, avoiding the use of `sum_input + reference_energy`.
 
 ## Experimental Results
-![results/photo2_photo4_gs.jpg](results/photo2_photo4_gs.jpg)
+![4k_results_20260820a.jpg](Kinoform_Optimization/results/4k_results_20260820a.jpg)
+
+The proposed Dummy-Area-aided GS algorithm and the present image-processing simulation significantly improve reconstruction quality compared to conventional GS and fully constrained GS methods.
+By preserving the target amplitude in the signal region and adaptively scaling the dummy region,
+the method achieves higher diffraction efficiency and superior visual fidelity.
+
+Across 4000 test images, the proposed method consistently achieved:
+
+- PSNR: 41–51.9 dB
+- SSIM: Ave.:0.98–0.99
+- DE: Ave.:81.6 %
+- PSNR-HVS: Ave.:53.6 dB
+
+These results demonstrate the robustness and practical applicability of the method
+for high-quality phase-only hologram generation.
+
+![results/photo2_photo4_gs.jpg](Kinoform_Optimization/results/photo2_photo4_gs.jpg)
 
 ### Comparison of Reconstruction Quality
 
@@ -68,6 +84,13 @@ PSNR: 20.464 dB
 SSIM: 0.7356  
 DE: 98.48%
 
+---
+### Dummy-Area-aided GS Algorithm with Energy Scaling 
+![Algorithm.jpg](Kinoform_Optimization/results/Algorithm.jpg)
+
+---
+
+
 ### Citation
 If you find this code useful in your research, please consider citing our preprint on Jxiv:
 ```text
@@ -89,6 +112,8 @@ If you find this code useful in your research, please consider citing our prepri
 * **2026-08-20**
   * **Improved Readability:** By modularizing and standardizing the diffraction efficiency (DE) calculation into the calculateDiffractionEfficiencyWithMask function, code readability and the maintainability of the evaluation logic have been significantly improved.
   *  **File Update:** Updated the executable files to the latest version (TxtOnly0820a.exe / ImgDisp0820a.exe).
+* **2026-08-24**
+  * **Addition of Experimental Results**
     
 <a id="japanese"></a>
 ## 日本語
@@ -143,3 +168,5 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
 * **2026-08-20**
   * **コードの可読性向上:** 回折効率（DE: Diffraction Efficiency）の算出処理を calculateDiffractionEfficiencyWithMask 関数として共通化・モジュール化したことで、コードの可読性および評価ロジックの保守性が大幅に向上しました。
   * **ファイル更新:** 実行ファイル名を最新版（TxtOnly0820a.exe / ImgDisp0820a.exe）に更新しました。
+* **2026-08-24**
+  * **実験結果の追加**

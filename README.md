@@ -37,6 +37,37 @@ To perform a complete reproduction of the experiments, please download the datas
 **Diffraction Efficiency (DE):** 
 In this simulation, the physical model of the LCOS device is assumed to have an amplitude reflectance of a=1.0. When calculating the diffraction efficiency, the total sum of the intensity hologram `sum(I)` is used as the denominator, avoiding the use of `sum_input + reference_energy`.
 
+## Experimental Results
+![results/photo2_photo4_gs.jpg](results/photo2_photo4_gs.jpg)
+
+### Comparison of Reconstruction Quality
+
+#### Input Image (Photo 2)
+
+#### Proposed Method: Dummy-Area-aided GS
+PSNR: 46.684 dB  
+SSIM: 0.9862  
+DE: 81.90%
+
+#### Conventional GS Method
+PSNR: 20.394 dB  
+SSIM: 0.6784  
+DE: 98.60%
+
+---
+
+#### Input Image (Photo 4)
+
+#### Proposed Method: Dummy-Area-aided GS
+PSNR: 45.09 dB  
+SSIM: 0.9852  
+DE: 81.69%
+
+#### Conventional GS Method
+PSNR: 20.464 dB  
+SSIM: 0.7356  
+DE: 98.48%
+
 ### Citation
 If you find this code useful in your research, please consider citing our preprint on Jxiv:
 ```text

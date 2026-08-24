@@ -38,7 +38,7 @@ To perform a complete reproduction of the experiments, please download the datas
 In this simulation, the physical model of the LCOS device is assumed to have an amplitude reflectance of a=1.0. When calculating the diffraction efficiency, the total sum of the intensity hologram `sum(I)` is used as the denominator, avoiding the use of `sum_input + reference_energy`.
 
 ## Experimental Results
-![4k_results_20260820a.jpg](Kinoform_Optimization/results/4k_results_20260820a.jpg)
+![4k_results_20260820a.jpg](results/4k_results_20260820a.jpg)
 
 The proposed Dummy-Area-aided GS algorithm and the present image-processing simulation significantly improve reconstruction quality compared to conventional GS and fully constrained GS methods.
 By preserving the target amplitude in the signal region and adaptively scaling the dummy region,
@@ -54,7 +54,7 @@ Across 4000 test images, the proposed method consistently achieved:
 These results demonstrate the robustness and practical applicability of the method
 for high-quality phase-only hologram generation.
 
-![results/photo2_photo4_gs.jpg](Kinoform_Optimization/results/photo2_photo4_gs.jpg)
+![results/photo2_photo4_gs.jpg](results/photo2_photo4_gs.jpg)
 
 ### Comparison of Reconstruction Quality
 
@@ -86,7 +86,7 @@ DE: 98.48%
 
 ---
 ### Dummy-Area-aided GS Algorithm with Energy Scaling 
-![Algorithm.jpg](Kinoform_Optimization/results/Algorithm.jpg)
+![Algorithm.jpg](results/Algorithm.jpg)
 
 ---
 

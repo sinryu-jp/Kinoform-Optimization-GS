@@ -42,7 +42,7 @@ In this simulation, the physical model of the LCOS device is assumed to have an 
 
 The proposed Dummy-Area-aided GS algorithm and the present image-processing simulation significantly improve reconstruction quality compared to conventional GS and fully constrained GS methods.
 By preserving the target amplitude in the signal region and adaptively scaling the dummy region,
-the method achieves higher diffraction efficiency and superior visual fidelity.
+the method strikes an optimal balance, achieving high diffraction efficiency while maintaining superior visual fidelity.
 
 Across 4000 test images, the proposed method consistently achieved:
 

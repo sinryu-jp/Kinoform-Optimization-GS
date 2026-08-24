@@ -46,10 +46,10 @@ the method achieves higher diffraction efficiency and superior visual fidelity.
 
 Across 4000 test images, the proposed method consistently achieved:
 
-- PSNR: 41.0 – 51.9 dB
-- SSIM: 0.98 – 0.99 (Average)
-- DE(Diffraction Efficiency): 81.6% (Average)
-- PSNR-HVS: 53.6 dB (Average)
+- **PSNR**: 41.0 – 51.9 dB
+- **SSIM**: 0.98 – 0.99 (Average)
+- **DE(Diffraction Efficiency)**: 81.6% (Average)
+- **PSNR-HVS**: 53.6 dB (Average)
 
 These results demonstrate the robustness and practical applicability of the method
 for high-quality phase-only hologram generation.

@@ -60,29 +60,29 @@ for high-quality phase-only hologram generation.
 
 #### Input Image (Photo 2)
 
-#### Proposed Method: Dummy-Area-aided GS
-PSNR: 46.684 dB  
-SSIM: 0.9862  
-DE: 81.90%
+* #### Proposed Method(Dummy-Area-aided GS):
+  * PSNR: 46.684 dB  
+  * SSIM: 0.9862  
+  * DE: 81.90%
 
-#### Conventional GS Method
-PSNR: 20.394 dB  
-SSIM: 0.6784  
-DE: 98.60%
+* #### Conventional GS Method:
+  * PSNR: 20.394 dB  
+  * SSIM: 0.6784  
+  * DE: 98.60%
 
 ---
 
 #### Input Image (Photo 4)
 
-#### Proposed Method: Dummy-Area-aided GS
-PSNR: 45.09 dB  
-SSIM: 0.9852  
-DE: 81.69%
+* #### Proposed Method(Dummy-Area-aided GS):
+  * PSNR: 45.09 dB  
+  * SSIM: 0.9852  
+  * DE: 81.69%
 
-#### Conventional GS Method
-PSNR: 20.464 dB  
-SSIM: 0.7356  
-DE: 98.48%
+* #### Conventional GS Method:
+  * PSNR: 20.464 dB  
+  * SSIM: 0.7356  
+  * DE: 98.48%
 
 ---
 ### Dummy-Area-aided GS Algorithm with Energy Scaling 

@@ -48,7 +48,7 @@ Across 4000 test images, the proposed method consistently achieved:
 
 - **PSNR**: 41.0 – 51.9 dB
 - **SSIM**: 0.98 – 0.99 (Average)
-- **DE(Diffraction Efficiency)**: 81.6 % (Average)
+- **DE(Diffraction Efficiency)**: 81.6% (Average)
 - **PSNR-HVS**: 53.6 dB (Average)
 
 These results demonstrate the robustness and practical applicability of the method
@@ -63,12 +63,12 @@ for high-quality phase-only hologram generation.
 * #### Proposed Method(Dummy-Area-aided GS):
   * PSNR: 46.684 dB  
   * SSIM: 0.9862  
-  * DE: 81.90 %
+  * DE: 81.90%
 
 * #### Conventional GS Method:
   * PSNR: 20.394 dB  
   * SSIM: 0.6784  
-  * DE: 98.60 %
+  * DE: 98.60%
 
 ---
 
@@ -77,12 +77,12 @@ for high-quality phase-only hologram generation.
 * #### Proposed Method(Dummy-Area-aided GS):
   * PSNR: 45.09 dB  
   * SSIM: 0.9852  
-  * DE: 81.69 %
+  * DE: 81.69%
 
 * #### Conventional GS Method:
   * PSNR: 20.464 dB  
   * SSIM: 0.7356  
-  * DE: 98.48 %
+  * DE: 98.48%
 
 ---
 ### Dummy-Area-aided GS Algorithm with Energy Scaling 

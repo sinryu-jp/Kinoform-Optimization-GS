@@ -48,7 +48,7 @@ Across 4000 test images, the proposed method consistently achieved:
 
 - **PSNR**: 41.0 – 51.9 dB
 - **SSIM**: 0.98 – 0.99 (Average)
-- **DE(Diffraction Efficiency)**: 81.6% (Average)
+- **DE(Diffraction Efficiency)**: 81.6 % (Average)
 - **PSNR-HVS**: 53.6 dB (Average)
 
 These results demonstrate the robustness and practical applicability of the method
@@ -63,12 +63,12 @@ for high-quality phase-only hologram generation.
 * #### Proposed Method(Dummy-Area-aided GS):
   * PSNR: 46.684 dB  
   * SSIM: 0.9862  
-  * DE: 81.90%
+  * DE: 81.90 %
 
 * #### Conventional GS Method:
   * PSNR: 20.394 dB  
   * SSIM: 0.6784  
-  * DE: 98.60%
+  * DE: 98.60 %
 
 ---
 
@@ -77,12 +77,12 @@ for high-quality phase-only hologram generation.
 * #### Proposed Method(Dummy-Area-aided GS):
   * PSNR: 45.09 dB  
   * SSIM: 0.9852  
-  * DE: 81.69%
+  * DE: 81.69 %
 
 * #### Conventional GS Method:
   * PSNR: 20.464 dB  
   * SSIM: 0.7356  
-  * DE: 98.48%
+  * DE: 98.48 %
 
 ---
 ### Dummy-Area-aided GS Algorithm with Energy Scaling 
@@ -114,7 +114,13 @@ If you find this code useful in your research, please consider citing our prepri
   *  **File Update:** Updated the executable files to the latest version (TxtOnly0820a.exe / ImgDisp0820a.exe).
 * **2026-08-24**
   * **Addition of Experimental Results**
-    
+* **2026-08-26**
+  * **Addition of LICENSE:** Add MIT license and license notice to README
+---
+
+## LICENSE
+This project is licensed under the  [MIT License](LICENSE) , see the LICENSE file for details.
+
 <a id="japanese"></a>
 ## 日本語
 
@@ -170,3 +176,11 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
   * **ファイル更新:** 実行ファイル名を最新版（TxtOnly0820a.exe / ImgDisp0820a.exe）に更新しました。
 * **2026-08-24**
   * **実験結果の追加**
+* **2026-08-26**
+  * **ライセンスの追加:**　ライセンスを追加し、READMEを更新
+
+---
+## ライセンス (License)
+
+本プロジェクトのソースコードは [MITライセンス](LICENSE) のもとで公開されています。
+詳細については、リポジトリ内の `LICENSE` ファイルをご確認ください。

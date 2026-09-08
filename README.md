@@ -59,8 +59,8 @@ Select the Release configuration for optimal performance, build the solution (Ct
 C:/
 └── opencv/
     ├── opencv_world4110.lib
-    ├── opencv
-    └── opencv2
+    ├── opencv/
+    └── opencv2/
 ```
 
 ### Directory Structure

@@ -41,6 +41,27 @@ Since OpenCV installation paths vary by user, you need to link it locally.
 4. **Build and Run:**
 Select the Release configuration for optimal performance, build the solution (Ctrl + Shift + B), and run the simulation.
 
+### Repository Structure
+
+```text
+.
+├── CGH.sln
+├── CGH_FFT.cpp
+├── Project1/
+│   ├── Project1.vcxproj
+│   └── Project1.vcxproj.filters
+└── x64/
+    └── Release/
+        ├── opencv_world4110.dll
+        ├── Project1.exe
+        └── Project1.pdb
+
+C:/
+└── opencv
+    ├── opencv_world4110.lib
+    ├── opencv
+    └── opencv2
+```
 
 ### Directory Structure
 - `Kinoform_Optimization/`: Please place it on the desktop (such as the executable file).

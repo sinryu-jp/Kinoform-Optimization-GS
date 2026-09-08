@@ -44,7 +44,7 @@ Select the Release configuration for optimal performance, build the solution (Ct
 ### Repository Structure
 
 ```text
-.
+msvc/
 ├── CGH.sln
 ├── CGH_FFT.cpp
 ├── Project1/
@@ -160,6 +160,9 @@ If you find this code useful in your research, please consider citing our prepri
   * **Addition of LICENSE:** Add MIT license and license notice to README
 * **2026-09-08**
   * **Add Visual Studio project files:** Created a new `msvc` folder and added `.sln`, `.vcxproj`, and `.vcxproj.filters` to support compilation in Visual Studio.
+* **2026-09-09**
+  *  Added detailed build requirements and step-by-step instructions for Visual Studio.
+  *  Added the repository structure and an example of local OpenCV directory configuration.
 
 ## LICENSE
 This project is licensed under the  [MIT License](LICENSE) , see the LICENSE file for details.

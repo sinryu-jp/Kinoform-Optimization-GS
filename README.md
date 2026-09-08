@@ -21,6 +21,27 @@ by Masataka TOZUKA (Former Shonan Institute of Technology).
 - **OpenCV**: Version 4.110 or later is recommended (Used for image I/O and matrix operations).
 - **OpenMP**: Required to enable parallel processing for faster GS algorithm iterations.
 
+To build and run this simulation, you will need the following environment and libraries:
+
+* **OS:** Windows 10 / 11
+* **IDE / Compiler:** Visual Studio 2026 with "Desktop development with C++" workload
+
+### Build Instructions (Visual Studio)
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/sinryu-jp/Kinoform-Optimization-GS.git](https://github.com/sinryu-jp/Kinoform-Optimization-GS.git)
+
+2. **Open the project:**
+Navigate to the msvc folder and open the .sln file in Visual Studio.
+
+3. **Configure OpenCV Paths:**
+Since OpenCV installation paths vary by user, you need to link it locally.
+
+4. **Build and Run:**
+Select the Release configuration for optimal performance, build the solution (Ctrl + Shift + B), and run the simulation.
+
+
 ### Directory Structure
 - `Kinoform_Optimization/`: Please place it on the desktop (such as the executable file).
 - `src/`: Source code (`CGH_FFT.cpp`)

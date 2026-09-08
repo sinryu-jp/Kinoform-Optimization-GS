@@ -116,6 +116,8 @@ If you find this code useful in your research, please consider citing our prepri
   * **Addition of Experimental Results**
 * **2026-08-26**
   * **Addition of LICENSE:** Add MIT license and license notice to README
+* **2026-09-08**
+  * **Add Visual Studio project files:** Created a new `msvc` folder and added `.sln`, `.vcxproj`, and `.vcxproj.filters` to support compilation in Visual Studio.
 ---
 
 ## LICENSE
@@ -178,6 +180,8 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
   * **実験結果の追加**
 * **2026-08-26**
   * **ライセンスの追加:**　ライセンスを追加し、READMEを更新
+* **2026-09-08**
+  * **Visual Studioプロジェクトファイルの追加:**　新しく `msvc` という名前のフォルダーを作成し、コンパイル環境構築のために `.sln`、`.vcxproj`、`.vcxproj.filters` の3つのファイルを追加しました。
 
 ---
 ## ライセンス (License)

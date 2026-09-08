@@ -30,7 +30,7 @@ To build and run this simulation, you will need the following environment and li
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/sinryu-jp/Kinoform-Optimization-GS.git](https://github.com/sinryu-jp/Kinoform-Optimization-GS.git)
+   git clone https://github.com/sinryu-jp/Kinoform-Optimization-GS.git
 
 2. **Open the project:**
 Navigate to the msvc folder and open the .sln file in Visual Studio.

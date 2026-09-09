@@ -23,8 +23,8 @@ by Masataka TOZUKA (Former Shonan Institute of Technology).
 
 To build and run this simulation, you will need the following environment and libraries:
 
-* **OS:** Windows 10 / 11
-* **IDE / Compiler:** Visual Studio 2026 with "Desktop development with C++" workload
+* **OS:** Windows 11
+* **IDE / Compiler:** Visual Studio Community 2026 with "Desktop development with C++" workload
 
 ### Build Instructions (Visual Studio)
 
@@ -33,13 +33,13 @@ To build and run this simulation, you will need the following environment and li
    git clone https://github.com/sinryu-jp/Kinoform-Optimization-GS.git
 
 2. **Open the project:**
-Navigate to the msvc folder and open the .sln file in Visual Studio.
+Navigate to the msvc folder and open the `.sln` file in Visual Studio.
 
 3. **Configure OpenCV Paths:**
 Since OpenCV installation paths vary by user, you need to link it locally.
 
 4. **Build and Run:**
-Select the Release configuration for optimal performance, build the solution (Ctrl + Shift + B), and run the simulation.
+Select the `Release` configuration for optimal performance, build the solution (Ctrl + Shift + B), and run the simulation.
 
 ### Repository Structure
 

@@ -132,7 +132,45 @@ for high-quality phase-only hologram generation.
 
 ---
 
+```text
+ ● Algorithm A-1: Dummy-Area-aided GS Algorithm with Energy Scaling (English version)
 
+--------------------------------------------------------------------------------------------------------------
+Input : Input image I_in (N x N) (upper half: signal region SR, lower half: dummy region DR)
+Output : 8-bit quantized POH H_quant (0-255), reconstructed image I_rec
+--------------------------------------------------------------------------------------------------------------
+ 1: A_target(x, y) <- sqrt(I_in(x, y))                      // Create target amplitude
+ 2: phi(x, y) <- UniformRandom(0, 2*pi)                     // Assign initial random phase
+ 3: A_current(x, y) <- A_target(x, y)
+ 4: for iter = 1 to N_iter (119 times) do
+ 5:     E_obj(x, y) <- A_current(x, y) * exp(j * phi(x, y)) // Complex amplitude on object plane
+ 6:     E_holo(u, v) <- FFT2D(E_obj(x, y))                  // Propagate to hologram plane
+ 7:     theta(u, v) <- arg(E_holo(u, v))                    // Phase extraction
+ 8:     E_holo_POH(u, v) <- 1.0 * exp(j * theta(u, v))      // POH constraint (amplitude = 1.0)
+ 9:     E_rec(x, y) <- IFFT2D_scaled(E_holo_POH(u, v))      // Back-propagate to object plane
+10:     A_rec(x, y) <- |E_rec(x, y)|
+11:     phi(x, y) <- arg(E_rec(x, y))                       // Update phase for next iteration
+12:     
+13:     // Calculate scale factor S based on the energy ratio in the signal region
+14: 　S <- sqrt( sum_{(x,y) in SR} (A_target(x,y))^2 / sum_{(x,y) in SR} (A_rec(x,y))^2 )
+15:     
+16:     // Update object-plane amplitude (release excess energy into the dummy region)
+17:     for each pixel (x, y) do
+18:         if (x, y) in SR (y < N/2) then
+19:             A_current(x, y) <- A_target(x, y)
+20:         else
+21:             A_current(x, y) <- A_rec(x, y) * S
+22:         end if
+23:     end for
+24: end for
+25: phi_norm(u, v) <- (mod(theta(u, v), 2*pi)) / (2*pi)
+26: H_quant(u, v) <- round(phi_norm(u, v) * 255.0)               // 8-bit quantization
+27: I_raw(x, y) <- |IFFT2D_scaled(1.0 * exp(j * (H_quant / 255.0 * 2*pi)))|^2
+28: I_clipped(x, y) <- ClipTop0.01Percent(I_raw(x, y))            // Intensity clipping
+29: Deff_median <- Median(I_clipped_{SR}) - Median(I_in_{SR})     // Median difference
+30: I_rec(x, y) <- I_clipped(x, y) - Deff_median                  // Median-corrected output
+----------------------------------------------------------------------------------------------------------
+```
 ### Citation
 If you find this code useful in your research, please consider citing our preprint on Jxiv:
 ```text
@@ -163,6 +201,8 @@ If you find this code useful in your research, please consider citing our prepri
 * **2026-09-09**
   *  Added detailed build requirements and step-by-step instructions for Visual Studio.
   *  Added the repository structure and an example of local OpenCV directory configuration.
+* **2026-09-11**
+  *  An English version of the algorithm was added to the experimental results section.
 ---
 
 ## LICENSE

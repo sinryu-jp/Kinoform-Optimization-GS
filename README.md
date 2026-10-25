@@ -123,7 +123,7 @@ for high-quality phase-only hologram generation.
 #### Input Image (Photo 2)
 
 * #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
-  * PSNR: $\color{red}{\text{**46.76**}}$ dB  
+  * PSNR: **$\color{red}{\text{46.76}}$** dB  
   * SSIM: **0.9941**  
   * DE: **82.87**%
 
@@ -142,7 +142,7 @@ for high-quality phase-only hologram generation.
 #### Input Image (Photo 4)
 
 * #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
-  * PSNR: $\color{red}{\text{**48.60**}}$ dB  
+  * PSNR: **$\color{red}{\text{48.60}}$** dB  
   * SSIM: **0.9978**  
   * DE: **82.62**%
 

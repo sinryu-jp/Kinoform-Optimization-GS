@@ -163,7 +163,7 @@ for high-quality phase-only hologram generation.
 ---
 
 <details>
-<summary> $\color{blue}{\text{[Previous version of the algorithm]}}$Show details of Algorithm A-1 (more)</summary>
+**<summary> [Previous version of the algorithm] details of Algorithm A-1 (more)</summary>**
 
 ```text 
 This is for the case where the executable files are TxtOnly0820a.exe and ImgDisp0820a.exe.

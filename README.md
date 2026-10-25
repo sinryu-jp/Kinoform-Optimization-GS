@@ -12,12 +12,9 @@
 ### Overview
 This repository contains the C++ simulation code for generating highly optimized Phase-Only Holograms (Kinoforms). The proposed method utilizes the Gerchberg-Saxton (GS) algorithm with a dummy area and median correction to achieve both high diffraction efficiency **(>80%)** and high-fidelity reconstruction **(PSNR >47dB)**.
 
-$\color{red}{\text{この部分だけが赤色で表示されます。}}$
-
 The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
 This approach achieves **an average PSNR of $\color{red}{\text{49.33 dB}}$ on the latest data (8 photo images)**.
 By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
-
 
 This code is the official implementation for the paper:
 **"Demonstration of High-Fidelity Reconstruction, High Diffraction Efficiency, and Data Loss Tolerance in Kinoforms"** 
@@ -126,7 +123,7 @@ for high-quality phase-only hologram generation.
 #### Input Image (Photo 2)
 
 * #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
-  * PSNR: **46.76** dB  
+  * PSNR: $\color{red}{\text{**46.76**}}$ dB  
   * SSIM: **0.9941**  
   * DE: **82.87**%
 
@@ -145,7 +142,7 @@ for high-quality phase-only hologram generation.
 #### Input Image (Photo 4)
 
 * #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
-  * PSNR: **48.60** dB  
+  * PSNR: $\color{red}{\text{**48.60**}}$ dB  
   * SSIM: **0.9978**  
   * DE: **82.62**%
 

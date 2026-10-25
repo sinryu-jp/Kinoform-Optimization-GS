@@ -80,6 +80,13 @@ Because the full set of 4,000 images has a large file size, it is not included i
 To perform a complete reproduction of the experiments, please download the dataset （`/*_192`）from the official website below, place all images into the data/ folder, and then run the program.
 - MIT-CGH-4K Dataset: https://github.com/liangs111/tensor_holography
 
+## Usage
+
+
+https://github.com/user-attachments/assets/9dbe90a5-bd16-4819-becc-85681aa8a9cf
+
+
+
 ### Important Notes on Calculation
 **Diffraction Efficiency (DE):** 
 In this simulation, the physical model of the LCOS device is assumed to have an amplitude reflectance of a=1.0. When calculating the diffraction efficiency, the total sum of the intensity hologram `sum(I)` is used as the denominator, avoiding the use of `sum_input + reference_energy`.
@@ -89,9 +96,9 @@ In this simulation, the physical model of the LCOS device is assumed to have an 
 |Input Command Example|Enabled Features|Description of Operation|
 | :--- | :---: | :--- |
 |**`run`**|Standard ExecutionMedian Correction: ON / LSQ Correction: OFF|Executes the GS algorithm with a dummy area and applies only background lifting correction to the reconstructed image by subtracting the median difference.|
-|**`run_lsq`**|Standard Execution + LSQ CorrectionMedian Correction: ON / LSQ Correction: ON|"After suppressing the background using median correction, applies gain/offset correction (LSQ) that minimizes the residual sum of squares with the reference image, and calculates the PSNR."|
-|**`run_nomed`**|Standard Execution + Median Correction OFFMedian Correction: OFF / LSQ Correction: OFF|"Skips the subtraction of the median difference. Outputs and evaluates the reconstructed image while maintaining the ""raw brightness lifting"" (noise and zero-order light components)."|
-|**`run_lsq_nomed`**|Standard Execution + Median Correction OFF + LSQ CorrectionMedian Correction: OFF / LSQ Correction: ON|"Applies direct LSQ correction (linear fitting) for evaluation on the ""raw reconstructed image"" where median correction was skipped."|
+| **`run_lsq`** | Standard Execution + LSQ Correction Median Correction: ON / LSQ Correction: ON |"After suppressing the background using median correction, applies gain/offset correction (LSQ) that minimizes the residual sum of squares with the reference image, and calculates the PSNR."|
+| **`run_nomed`** | Standard Execution + Median Correction OFF Median Correction: OFF / LSQ Correction: OFF |"Skips the subtraction of the median difference. Outputs and evaluates the reconstructed image while maintaining the ""raw brightness lifting"" (noise and zero-order light components)."|
+| **`run_lsq_nomed`** | Standard Execution + Median Correction OFF + LSQ Correction Median Correction: OFF / LSQ Correction: ON |"Applies direct LSQ correction (linear fitting) for evaluation on the ""raw reconstructed image"" where median correction was skipped."|
 
 ## Experimental Results
 ![4k_results_20260820a.jpg](Kinoform_Optimization/results/4k_results_20260820a.jpg)
@@ -287,6 +294,8 @@ If you find this code useful in your research, please consider citing our prepri
 * **2026-10-25**
   * Updated the algorithm to the dummy-area-aided GS-beta method.
   * Enabled higher-precision evaluation than conventional methods by combining median and LSQ corrections.
+* **2026-10-26**
+  * Added the Usage.
 ---
 
 ## LICENSE

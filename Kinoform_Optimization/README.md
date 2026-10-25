@@ -299,7 +299,7 @@ If you find this code useful in your research, please consider citing our prepri
 ---
 
 ## LICENSE
-This project is licensed under the  [MIT License](sinryu-jp/Kinoform-Optimization-GS/LICENSE) , see the LICENSE file for details.
+This project is licensed under the  [MIT License](../LICENSE) , see the LICENSE file for details.
 
 <a id="japanese"></a>
 ## 日本語
@@ -364,5 +364,5 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
 ---
 ## ライセンス (License)
 
-本プロジェクトのソースコードは [MITライセンス](sinryu-jp/Kinoform-Optimization-GS/LICENSE) のもとで公開されています。
+本プロジェクトのソースコードは [MITライセンス](../LICENSE) のもとで公開されています。
 詳細については、リポジトリ内の `LICENSE` ファイルをご確認ください。

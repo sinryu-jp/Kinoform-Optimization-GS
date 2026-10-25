@@ -363,7 +363,8 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
   * **ライセンスの追加:**　ライセンスを追加し、READMEを更新
 * **2026-09-08**
   * **Visual Studioプロジェクトファイルの追加:**　新しく `msvc` という名前のフォルダーを作成し、コンパイル環境構築のために `.sln`、`.vcxproj`、`.vcxproj.filters` の3つのファイルを追加しました。
-
+* **2026-10-26**
+  * **概要の新規仕様の追加**
 ---
 ## ライセンス (License)
 

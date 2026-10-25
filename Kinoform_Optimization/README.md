@@ -13,9 +13,8 @@
 This repository contains the C++ simulation code for generating highly optimized Phase-Only Holograms (Kinoforms). The proposed method utilizes the Gerchberg-Saxton (GS) algorithm with a dummy area and median correction to achieve both high diffraction efficiency **(>80%)** and high-fidelity reconstruction **(PSNR >47dB)**.
 
 The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
-This approach achieves **an average PSNR of 49.33 dB on the latest data (8 photo images)**.
-By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
-
+This approach achieves **an average PSNR of $\color{red}{\text{49.33 dB}}$ on the latest data (8 photo images)**.
+By combining median correction and LSQ gain/offset correction, it enables higher-precision evaluation than conventional methods.
 
 This code is the official implementation for the paper:
 **"Demonstration of High-Fidelity Reconstruction, High Diffraction Efficiency, and Data Loss Tolerance in Kinoforms"** 
@@ -95,13 +94,13 @@ In this simulation, the physical model of the LCOS device is assumed to have an 
 
 |Input Command Example|Enabled Features|Description of Operation|
 | :--- | :---: | :--- |
-|**`run`**|Standard ExecutionMedian Correction: ON / LSQ Correction: OFF|Executes the GS algorithm with a dummy area and applies only background lifting correction to the reconstructed image by subtracting the median difference.|
-| **`run_lsq`** | Standard Execution + LSQ Correction Median Correction: ON / LSQ Correction: ON |"After suppressing the background using median correction, applies gain/offset correction (LSQ) that minimizes the residual sum of squares with the reference image, and calculates the PSNR."|
-| **`run_nomed`** | Standard Execution + Median Correction OFF Median Correction: OFF / LSQ Correction: OFF |"Skips the subtraction of the median difference. Outputs and evaluates the reconstructed image while maintaining the ""raw brightness lifting"" (noise and zero-order light components)."|
-| **`run_lsq_nomed`** | Standard Execution + Median Correction OFF + LSQ Correction Median Correction: OFF / LSQ Correction: ON |"Applies direct LSQ correction (linear fitting) for evaluation on the ""raw reconstructed image"" where median correction was skipped."|
+|**`run`**|Standard Execution<br> $\color{blue}{\text{Median Correction: ON}}$<br>$\color{blue}{\text{LSQ Correction: OFF}}$ | Executes the GS algorithm with a dummy area and applies only background lifting correction to the reconstructed image by subtracting the median difference.|
+| **`run_lsq`** | Standard Execution + LSQ Correction<br> $\color{blue}{\text{Median Correction: ON}}$<br>$\color{blue}{\text{LSQ Correction: ON}}$ |"After suppressing the background using median correction, applies gain/offset correction (LSQ) that minimizes the residual sum of squares with the reference image, and calculates the PSNR."|
+| **`run_nomed`** | Standard Execution + Median Correction OFF<br> $\color{blue}{\text{Median Correction: OFF}}$<br>$\color{blue}{\text{LSQ Correction: OFF}}$ |"Skips the subtraction of the median difference. Outputs and evaluates the reconstructed image while maintaining the ""raw brightness lifting"" (noise and zero-order light components)."|
+| **`run_lsq_nomed`** | Standard Execution + Median Correction OFF + LSQ Correction<br> $\color{blue}{\text{Median Correction: OFF}}$<br>$\color{blue}{\text{LSQ Correction: ON}}$ |"Applies direct LSQ correction (linear fitting) for evaluation on the ""raw reconstructed image"" where median correction was skipped."|
 
 ## Experimental Results
-![4k_results_20260820a.jpg](results/4k_results_20260820a.jpg)
+![4k_results_20260820a.jpg](Kinoform_Optimization/results/4k_results_20260820a.jpg)
 
 The proposed Dummy-Area-aided GS algorithm and the present image-processing simulation significantly improve reconstruction quality compared to conventional GS and fully constrained GS methods.
 By preserving the target amplitude in the signal region and adaptively scaling the dummy region,
@@ -117,14 +116,14 @@ Across 4000 test images, the proposed method consistently achieved:
 These results demonstrate the robustness and practical applicability of the method
 for high-quality phase-only hologram generation.
 
-![results/photo2_photo4_gs.jpg](results/photo2_photo4_gs.jpg)
+![results/photo2_photo4_gs.jpg](Kinoform_Optimization/results/photo2_photo4_gs.jpg)
 
 ### Comparison of Reconstruction Quality
 
 #### Input Image (Photo 2)
 
 * #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
-  * PSNR: **46.76** dB  
+  * PSNR: **$\color{red}{\text{46.76}}$** dB  
   * SSIM: **0.9941**  
   * DE: **82.87**%
 
@@ -143,7 +142,7 @@ for high-quality phase-only hologram generation.
 #### Input Image (Photo 4)
 
 * #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
-  * PSNR: **48.60** dB  
+  * PSNR: **$\color{red}{\text{48.60}}$** dB  
   * SSIM: **0.9978**  
   * DE: **82.62**%
 
@@ -159,12 +158,12 @@ for high-quality phase-only hologram generation.
 
 ---
 ### Dummy-Area-aided GS Algorithm with Energy Scaling 
-![Algorithm.jpg](results/Algorithm.jpg)
+![Algorithm.jpg](Kinoform_Optimization/results/Algorithm.jpg)
 
 ---
 
 <details>
-<summary> [Previous version of the algorithm]Show details of Algorithm A-1 (more)</summary>
+<summary> 📒[<strong>Previous version</strong> of the algorithm] details of Algorithm A-1 (more)</summary>
 
 ```text 
 This is for the case where the executable files are TxtOnly0820a.exe and ImgDisp0820a.exe.
@@ -212,7 +211,7 @@ Output : 8-bit quantized POH H_quant (0-255), reconstructed image I_rec
 
 The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
 This approach achieves an average PSNR of 49.33 dB on the latest data (8 photo images).
-By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
+By combining median correction and LSQ gain/offset correction, it enables higher-precision evaluation than conventional methods.
 
 This is for the case where the executable files are TxtOnly1025a.exe and ImgDisp1025a.exe.
 ● Algorithm A-2: Dummy-Area-aided GS-beta Algorithm with Energy Scaling (English version)
@@ -293,13 +292,13 @@ If you find this code useful in your research, please consider citing our prepri
   *  An English version of the algorithm was added to the experimental results section.
 * **2026-10-25**
   * Updated the algorithm to the dummy-area-aided GS-beta method.
-  * Enabled higher-precision evaluation than conventional methods by combining median and LSQ corrections.
+  * Enabled higher-precision evaluation than conventional methods by combining median and LSQ gain/offset corrections.
 * **2026-10-26**
   * Added the Usage.
 ---
 
 ## LICENSE
-This project is licensed under the  [MIT License](../LICENSE) , see the LICENSE file for details.
+This project is licensed under the  [MIT License](LICENSE) , see the LICENSE file for details.
 
 <a id="japanese"></a>
 ## 日本語
@@ -364,5 +363,5 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
 ---
 ## ライセンス (License)
 
-本プロジェクトのソースコードは [MITライセンス](../LICENSE) のもとで公開されています。
+本プロジェクトのソースコードは [MITライセンス](LICENSE) のもとで公開されています。
 詳細については、リポジトリ内の `LICENSE` ファイルをご確認ください。

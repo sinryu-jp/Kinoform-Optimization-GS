@@ -14,7 +14,7 @@ This repository contains the C++ simulation code for generating highly optimized
 
 The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
 This approach achieves **an average PSNR of $\color{red}{\text{49.33 dB}}$ on the latest data (8 photo images)**.
-By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
+By combining median correction and LSQ gain/offset correction, it enables higher-precision evaluation than conventional methods.
 
 This code is the official implementation for the paper:
 **"Demonstration of High-Fidelity Reconstruction, High Diffraction Efficiency, and Data Loss Tolerance in Kinoforms"** 
@@ -211,7 +211,7 @@ Output : 8-bit quantized POH H_quant (0-255), reconstructed image I_rec
 
 The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
 This approach achieves an average PSNR of 49.33 dB on the latest data (8 photo images).
-By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
+By combining median correction and LSQ gain/offset correction, it enables higher-precision evaluation than conventional methods.
 
 This is for the case where the executable files are TxtOnly1025a.exe and ImgDisp1025a.exe.
 ● Algorithm A-2: Dummy-Area-aided GS-beta Algorithm with Energy Scaling (English version)
@@ -292,7 +292,7 @@ If you find this code useful in your research, please consider citing our prepri
   *  An English version of the algorithm was added to the experimental results section.
 * **2026-10-25**
   * Updated the algorithm to the dummy-area-aided GS-beta method.
-  * Enabled higher-precision evaluation than conventional methods by combining median and LSQ corrections.
+  * Enabled higher-precision evaluation than conventional methods by combining median and LSQ gain/offset corrections.
 * **2026-10-26**
   * Added the Usage.
 ---

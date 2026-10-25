@@ -100,7 +100,7 @@ In this simulation, the physical model of the LCOS device is assumed to have an 
 | **`run_lsq_nomed`** | Standard Execution + Median Correction OFF + LSQ Correction<br> $\color{blue}{\text{Median Correction: OFF}}$<br>$\color{blue}{\text{LSQ Correction: ON}}$ |"Applies direct LSQ correction (linear fitting) for evaluation on the ""raw reconstructed image"" where median correction was skipped."|
 
 ## Experimental Results
-![4k_results_20260820a.jpg](Kinoform_Optimization/results/4k_results_20260820a.jpg)
+![4k_results_20260820a.jpg](results/4k_results_20260820a.jpg)
 
 The proposed Dummy-Area-aided GS algorithm and the present image-processing simulation significantly improve reconstruction quality compared to conventional GS and fully constrained GS methods.
 By preserving the target amplitude in the signal region and adaptively scaling the dummy region,
@@ -116,7 +116,7 @@ Across 4000 test images, the proposed method consistently achieved:
 These results demonstrate the robustness and practical applicability of the method
 for high-quality phase-only hologram generation.
 
-![results/photo2_photo4_gs.jpg](Kinoform_Optimization/results/photo2_photo4_gs.jpg)
+![results/photo2_photo4_gs.jpg](results/photo2_photo4_gs.jpg)
 
 ### Comparison of Reconstruction Quality
 
@@ -158,7 +158,7 @@ for high-quality phase-only hologram generation.
 
 ---
 ### Dummy-Area-aided GS Algorithm with Energy Scaling 
-![Algorithm.jpg](Kinoform_Optimization/results/Algorithm.jpg)
+![Algorithm.jpg](results/Algorithm.jpg)
 
 ---
 
@@ -298,7 +298,7 @@ If you find this code useful in your research, please consider citing our prepri
 ---
 
 ## LICENSE
-This project is licensed under the  [MIT License](LICENSE) , see the LICENSE file for details.
+This project is licensed under the  [MIT License](../LICENSE) , see the LICENSE file for details.
 
 <a id="japanese"></a>
 ## 日本語
@@ -363,5 +363,5 @@ https://github.com/user-attachments/assets/aec17871-8b15-4289-87c3-1767eef83cc8
 ---
 ## ライセンス (License)
 
-本プロジェクトのソースコードは [MITライセンス](LICENSE) のもとで公開されています。
+本プロジェクトのソースコードは [MITライセンス](../LICENSE) のもとで公開されています。
 詳細については、リポジトリ内の `LICENSE` ファイルをご確認ください。

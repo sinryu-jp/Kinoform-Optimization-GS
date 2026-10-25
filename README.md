@@ -10,7 +10,12 @@
 ## English
 
 ### Overview
-This repository contains the C++ simulation code for generating highly optimized Phase-Only Holograms (Kinoforms). The proposed method utilizes the Gerchberg-Saxton (GS) algorithm with a dummy area and median correction to achieve both high diffraction efficiency (>80%) and high-fidelity reconstruction (PSNR >47dB).
+This repository contains the C++ simulation code for generating highly optimized Phase-Only Holograms (Kinoforms). The proposed method utilizes the Gerchberg-Saxton (GS) algorithm with a dummy area and median correction to achieve both high diffraction efficiency **(>80%)** and high-fidelity reconstruction **(PSNR >47dB)**.
+
+The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
+This approach achieves **an average PSNR of 49.33 dB on the latest data (8 photo images)**.
+By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
+
 
 This code is the official implementation for the paper:
 **"Demonstration of High-Fidelity Reconstruction, High Diffraction Efficiency, and Data Loss Tolerance in Kinoforms"** 
@@ -79,6 +84,15 @@ To perform a complete reproduction of the experiments, please download the datas
 **Diffraction Efficiency (DE):** 
 In this simulation, the physical model of the LCOS device is assumed to have an amplitude reflectance of a=1.0. When calculating the diffraction efficiency, the total sum of the intensity hologram `sum(I)` is used as the denominator, avoiding the use of `sum_input + reference_energy`.
 
+### List of Command Combinations (A table summarizing the ON/OFF combinations for each correction and their effects.)
+
+|Input Command Example|Enabled Features|Description of Operation|
+| :--- | :---: | :--- |
+|**`run`**|Standard ExecutionMedian Correction: ON / LSQ Correction: OFF|Executes the GS algorithm with a dummy area and applies only background lifting correction to the reconstructed image by subtracting the median difference.|
+|**`run_lsq`**|Standard Execution + LSQ CorrectionMedian Correction: ON / LSQ Correction: ON|"After suppressing the background using median correction, applies gain/offset correction (LSQ) that minimizes the residual sum of squares with the reference image, and calculates the PSNR."|
+|**`run_nomed`**|Standard Execution + Median Correction OFFMedian Correction: OFF / LSQ Correction: OFF|"Skips the subtraction of the median difference. Outputs and evaluates the reconstructed image while maintaining the ""raw brightness lifting"" (noise and zero-order light components)."|
+|**`run_lsq_nomed`**|Standard Execution + Median Correction OFF + LSQ CorrectionMedian Correction: OFF / LSQ Correction: ON|"Applies direct LSQ correction (linear fitting) for evaluation on the ""raw reconstructed image"" where median correction was skipped."|
+
 ## Experimental Results
 ![4k_results_20260820a.jpg](Kinoform_Optimization/results/4k_results_20260820a.jpg)
 
@@ -102,6 +116,11 @@ for high-quality phase-only hologram generation.
 
 #### Input Image (Photo 2)
 
+* #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
+  * PSNR: **46.76** dB  
+  * SSIM: **0.9941**  
+  * DE: **82.87**%
+
 * #### Proposed Method(Dummy-Area-aided GS):
   * PSNR: 46.684 dB  
   * SSIM: 0.9862  
@@ -115,6 +134,11 @@ for high-quality phase-only hologram generation.
 ---
 
 #### Input Image (Photo 4)
+
+* #### Proposed Method(Dummy-Area-aided GS-beta and LSQ gain/offset correction):
+  * PSNR: **48.60** dB  
+  * SSIM: **0.9978**  
+  * DE: **82.62**%
 
 * #### Proposed Method(Dummy-Area-aided GS):
   * PSNR: 45.09 dB  
@@ -132,8 +156,12 @@ for high-quality phase-only hologram generation.
 
 ---
 
-```text
- ● Algorithm A-1: Dummy-Area-aided GS Algorithm with Energy Scaling (English version)
+<details>
+<summary> [Previous version of the algorithm]Show details of Algorithm A-1 (more)</summary>
+
+```text 
+This is for the case where the executable files are TxtOnly0820a.exe and ImgDisp0820a.exe.
+● Algorithm A-1: Dummy-Area-aided GS Algorithm with Energy Scaling (English version)
 
 --------------------------------------------------------------------------------------------------------------
 Input : Input image I_in (N x N) (upper half: signal region SR, lower half: dummy region DR)
@@ -171,6 +199,59 @@ Output : 8-bit quantized POH H_quant (0-255), reconstructed image I_rec
 30: I_rec(x, y) <- I_clipped(x, y) - Deff_median                  // Median-corrected output
 ----------------------------------------------------------------------------------------------------------
 ```
+</details>
+
+```text
+
+The algorithm in this repository has been updated to the dummy-area-aided GS-beta method.
+This approach achieves an average PSNR of 49.33 dB on the latest data (8 photo images).
+By combining median correction and LSQ correction, it enables higher-precision evaluation than conventional methods.
+
+This is for the case where the executable files are TxtOnly1025a.exe and ImgDisp1025a.exe.
+● Algorithm A-2: Dummy-Area-aided GS-beta Algorithm with Energy Scaling (English version)
+
+--------------------------------------------------------------------------------------------------------------
+Input : Input image I_in (N x N) (upper part: signal region SR, lower part: dummy region DR)
+        Relaxation parameter beta (e.g., 2.05)
+        Number of iterations N_iter (e.g., 90 for SR 50%, 251 for SR 60%, 470 for SR 75%)
+Output : Quantized POH H_quant (0-255), reconstructed image I_rec
+--------------------------------------------------------------------------------------------------------------
+ 1: A_target(x, y) <- sqrt(I_in(x, y))                      // Create target amplitude
+ 2: phi(x, y) <- UniformRandom(0, 2*pi)                     // Assign initial random phase
+ 3: A_current(x, y) <- A_target(x, y)
+ 4: for iter = 1 to N_iter do
+ 5:     E_obj(x, y) <- A_current(x, y) * exp(j * phi(x, y)) // Complex amplitude on object plane
+ 6:     E_holo(u, v) <- FFT2D(E_obj(x, y))                  // Propagate to hologram plane
+ 7:     theta(u, v) <- arg(E_holo(u, v))                    // Phase extraction
+ 8:     E_holo_POH(u, v) <- 1.0 * exp(j * theta(u, v))      // POH constraint (amplitude = 1.0)
+ 9:     E_rec(x, y) <- IFFT2D_scaled(E_holo_POH(u, v))      // Back-propagate to object plane
+10:     A_rec(x, y) <- |E_rec(x, y)|
+11:     phi(x, y) <- arg(E_rec(x, y))                       // Update phase for next iteration
+12:     
+13:     // Calculate scale factor S based on the energy ratio in the signal region
+14:     S <- sqrt( sum_{(x,y) in SR} (A_target(x,y))^2 / sum_{(x,y) in SR} (A_rec(x,y))^2 )
+15:     
+16:     // Update object-plane amplitude (GS-beta constraint for SR, energy release for DR)
+17:     for each pixel (x, y) do
+18:         if (x, y) in SR then
+19:             relaxed <- (1.0 - beta) * A_rec(x, y) * S + beta * A_target(x, y)
+20:             A_current(x, y) <- max(0, relaxed)          // GS-beta constraint
+21:         else
+22:             A_current(x, y) <- A_rec(x, y) * S          // Dummy region energy release
+23:         end if
+24:     end for
+25: end for
+26: phi_norm(u, v) <- (mod(theta(u, v), 2*pi)) / (2*pi)
+27: H_quant(u, v) <- round(phi_norm(u, v) * 255.0)                // 8-bit quantization
+28: I_raw(x, y) <- |IFFT2D_scaled(1.0 * exp(j * (H_quant / 255.0 * 2*pi)))|^2
+29: I_clipped(x, y) <- ReplaceTop1PercentWithMin(I_raw(x, y))    // Intensity clipping (replace top 1% with min value)
+30: I_scaled(x, y) <- Scale(I_clipped(x, y)) to match max(I_in)  // Max-value scaling
+31: Deff_median <- Median(I_scaled_{SR}) - Median(I_in_{SR})     // Median difference
+32: I_rec_tmp(x, y) <- I_scaled(x, y) - Deff_median              // Median-corrected output (if "nomed" is OFF)
+33: I_rec(x, y) <- a * I_rec_tmp(x, y) + b                       // LSQ gain/offset correction (if "lsq" is ON)
+--------------------------------------------------------------------------------------------------------------
+```
+
 ### Citation
 If you find this code useful in your research, please consider citing our preprint on Jxiv:
 ```text
@@ -203,6 +284,9 @@ If you find this code useful in your research, please consider citing our prepri
   *  Added the repository structure and an example of local OpenCV directory configuration.
 * **2026-09-11**
   *  An English version of the algorithm was added to the experimental results section.
+* **2026-10-25**
+  * Updated the algorithm to the dummy-area-aided GS-beta method.
+  * Enabled higher-precision evaluation than conventional methods by combining median and LSQ corrections.
 ---
 
 ## LICENSE

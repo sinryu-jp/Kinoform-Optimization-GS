@@ -47,6 +47,16 @@ using namespace std;
 //1: Disable the display command.
 #define DISP_CUT 1
 
+// Amplitude-constraint relaxation parameter beta for the GS method (GS-beta)
+//   Signal region: |x| = max(0, (1-beta)*|U|*scale + beta*A)
+//   1.0: standard GS (pure replacement), 2.05: recommended (diverges above approx. 2.08)
+#define GS_BETA_VAL 2.05//1.0
+
+#define NloopMIT 5//20//4000//Number of MIT processing loop iterations
+
+#define Image0to7 8 //Additional loop count for reference images
+
+
 static string FileNameBMP[10];
 
 
@@ -1240,11 +1250,47 @@ int Diffmain(
 	return 0;
 }
 
-#define NloopMIT 4000//Number of MIT processing loop iterations
-
-#define Image0to7 8 //Additional loop count for reference images
-
 static double Hdata[7][NloopMIT + Image0to7 + 1];//Initialization (for storing history data)
+static double HdataPSNRFloat[NloopMIT + Image0to7 + 1];// PSNR of LSQ-corrected image without 8-bit rounding
+
+// Print the average float PSNR (LSQ, no rounding) over Hdata indices [startIdx, endIdx]
+void printFloatPSNRAverage(int startIdx, int endIdx)
+{
+	double sum = 0.0;
+	int cnt = 0;
+	for (int k = startIdx; k <= endIdx; ++k) {
+		if (HdataPSNRFloat[k] != 0.0) { sum += HdataPSNRFloat[k]; ++cnt; }
+	}
+	if (cnt == 0) return;
+	SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	std::cout << std::fixed << std::setprecision(2)
+		<< " PSNR(LSQ float, no rounding)= " << (sum / cnt) << "dB  [8bit rounded PSNR is shown above] (" << cnt << " images)" << std::endl;
+	SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+}
+
+// ============================================================
+// LSQ gain/offset correction
+//   Fit S' = a*S + b minimizing sum (M - (a*S + b))^2 (closed-form least squares),
+//   then apply it to S in place (rounded, saturated to 8-bit).
+// ============================================================
+void applyLSQCorrection(const cv::Mat& M, cv::Mat& S, double& a, double& b, cv::Mat* S_float = nullptr)
+{
+	cv::Mat m64, s64;
+	M.convertTo(m64, CV_64F);
+	S.convertTo(s64, CV_64F);
+	const double n = (double)s64.total();
+	const double sumS = cv::sum(s64)[0];
+	const double sumM = cv::sum(m64)[0];
+	const double sumSS = s64.dot(s64);
+	const double sumSM = s64.dot(m64);
+	const double den = n * sumSS - sumS * sumS;
+	if (std::abs(den) < 1e-12) { a = 1.0; b = 0.0; return; }
+	a = (n * sumSM - sumS * sumM) / den;
+	b = (sumM - a * sumS) / n;
+	s64 = s64 * a + b;
+	if (S_float) *S_float = s64.clone(); // Corrected values without 8-bit rounding
+	s64.convertTo(S, CV_8U); // convertTo rounds and saturates to [0,255]
+}
 struct EvalResults { double psnr=0.0, ssim=0.0, de=0.0; Mat reconImg; };
 
 // ============================================================
@@ -1320,8 +1366,9 @@ EvalResults evaluateHologram(
 
 		std::cout << std::fixed << std::setprecision(2);
 		std::cout << " DE " << Mde_out << "%" << std::endl;
-		SetConsoleColor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 #endif
+		//SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		//std::cout << std::fixed << std::setprecision(2);
 	}
 
 	res.de = Mde_out;
@@ -1365,7 +1412,7 @@ void aggregatePhotoResults()
 		<< " PSNR-HVS:" << count[1] << ",Z " << ZEROcount[1]
 		<< " PSNR-HVSM:" << count[2] << ",Z " << ZEROcount[2]
 		<< " SSIM,DE:" << count[2] << " \n";
-
+	SetConsoleColor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 	if (avg[0] == 0.0) std::cout << " PSNR(MSE=0) for Exact Match";
 	else               std::cout << " PSNR= " << avg[0] << "dB.";
 
@@ -1378,9 +1425,11 @@ void aggregatePhotoResults()
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << "  SSIM(Yoshikawa's Criterion)= " << avg[3] << "  SSIM(Standard AI Criterion)= " << avg[6];
 	std::cout << std::fixed << std::setprecision(2);
-	if (avg[4] == 100) std::cout << "   DE  100 (" << avg[5] << ")% ";
-	else               std::cout << "   DE  " << avg[4] << " (" << avg[5] << ")% ";
+	//if (avg[4] == 100) std::cout << "   DE  100 (" << avg[5] << ")% ";
+	//else               std::cout << "   DE  " << avg[4] << " (" << avg[5] << ")% ";
+	std::cout << "   DE  " << avg[4] << " % ";
 	std::cout << "Average" << std::endl;
+	SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
 	// cin.get() removed (would cause a deadlock in a parallel environment)
 }
@@ -1422,7 +1471,7 @@ void aggregateMITResults(int WKKK, const string& FILE_DTOP, const string& inputC
 		<< " SSIM,DE:" << count[3] << "," << count[4] << " \n";
 
 	for (int i = 0; i < 7; i++) { count[i] = 0; ZEROcount[i] = 0; }
-
+	SetConsoleColor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 	if (avg[0] == 0.0) std::cout << " PSNR(MSE=0) for Exact Match";
 	else               std::cout << " PSNR= " << avg[0] << "dB.";
 	if (avg[1] == 0.0) std::cout << " PSNR-HVS(MSE=0) for Exact Match";
@@ -1436,6 +1485,7 @@ void aggregateMITResults(int WKKK, const string& FILE_DTOP, const string& inputC
 	//else               std::cout << "   DE  " << avg[4] << " % ";
 	std::cout << "   DE  " << avg[4] << " % ";
 	std::cout << "Average" << std::endl;
+	SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
 	// --- Hdata[0] single histogram ---
 	{
@@ -1887,7 +1937,7 @@ int main(int argc, char* argv[])
 		//std::cout << "WKKK=" << WKKK << "  \\ \n";
 	Retry:
 
-		std::cout << "Enter save(save images),step(pause each time),run(execute: normalize, round, median correction, GS method: with dummy region)>> ";// << std::endl;
+		std::cout << "Enter save(save images),step(pause each time),run(execute: normalize, round, median correction, GS method: with dummy region),lsq(LSQ gain/offset correction ON),nomed(median correction OFF)>> ";
 		std::cin >> inputCom; // Get the input
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer
 
@@ -1950,20 +2000,17 @@ int main(int argc, char* argv[])
 				FName_Src = FILE_DTOP + "output\\" + Ws + "_Src_photo " + str + "_" + inputCom + ".bmp";
 				FName_cgh = FILE_DTOP + "output\\" + Ws + "_CGH_photo " + str + "_" + inputCom + ".bmp";
 				FName_his = FILE_DTOP + "output\\" + Ws + "_His_photo " + str + "_" + inputCom + ".bmp";
-				// SetConsoleColor/cout are protected with critical
-#pragma omp critical(console)
-				{
-					SetConsoleColor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-					std::cout << FName;
-					SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-				}
 			}
 			if (NsLoop < Image0to7) {// File names for image output during loop iterations 0-7
 				FName_END = Img_Read(FILE_DTOP, NsLoop, grayImage, target_mat, curSize, BLK);
 				FName_Srv = FName_Srv_ + FileNameBMP[NsLoop];
 #pragma omp critical(console)
 				{
-					{ cout << "\nFName_END=" << FName_END << std::endl; }
+					{ 
+						// SetConsoleColor/cout are protected with critical
+						SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+						cout << "FName_END=" << FName_END << std::endl;
+					}
 				}
 			}
 			if (NsLoop >= Image0to7)// File names for image output for loop iterations 8 and beyond
@@ -2014,7 +2061,7 @@ int main(int argc, char* argv[])
 			//   - Hologram plane : force the amplitude to 1 (phase-only = POH constraint)
 			// The lower part of the image is treated as a dummy region (for noise escape); by letting the amplitude vary freely there,
 			// this scheme greatly improves the reconstruction quality (PSNR) of the signal region.
-			int num_gs_iterations = 119;                    // Number of GS iterations (default: signal 50% / dummy 50%)
+			int num_gs_iterations = 90;                    // Number of GS iterations (default: signal 50% / dummy 50%)
 			cv::Mat A_target;
 			cv::sqrt(inputImage, A_target);                 // Target amplitude = sqrt(intensity). Converts the intensity image to amplitude
 			cv::Mat current_phase = Trans.clone();          // Initial phase: start from the random phase Trans
@@ -2047,6 +2094,7 @@ int main(int argc, char* argv[])
 						<< " signalRows=" << signalRows
 						<< " dummyRows=" << (curSize - signalRows)
 						<< " dummyRatio=" << (100.0 * (curSize - signalRows) / curSize) << "%"
+						<< " GS_BETA_VAL=" << GS_BETA_VAL
 						<< std::endl;
 				}
 			}
@@ -2093,8 +2141,12 @@ int main(int argc, char* argv[])
 				// Removed #pragma omp parallel for (to avoid double parallelism with the outer NsLoop)
 				for (int y = 0; y < curSize; y++) {
 					for (int x = 0; x < curSize; x++) {
-						if (y < signalRows)
-							current_mag.at<double>(y, x) = A_target.at<double>(y, x);
+						if (y < signalRows) {
+							// GS-beta: relaxed amplitude constraint (beta=1.0 equals pure replacement)
+							const double relaxed = (1.0 - GS_BETA_VAL) * gs_mag.at<double>(y, x) * scale
+								+ GS_BETA_VAL * A_target.at<double>(y, x);
+							current_mag.at<double>(y, x) = (relaxed > 0.0) ? relaxed : 0.0;
+						}
 						else
 							current_mag.at<double>(y, x) = gs_mag.at<double>(y, x) * scale;
 					}
@@ -2115,7 +2167,7 @@ int main(int argc, char* argv[])
 			// From here: quantize WkP to bitDepth to generate img_CGH (hologram for display/DE evaluation)
 
 			double scalingFactor = 1.0;// Scaling factor for diffraction efficiency evaluation
-			double bitDepth = 8.0;// Bit depth for quantization (8-bit or 16-bit)
+			double bitDepth = 8.0;//8.0;// Bit depth for quantization (8-bit or 16-bit)
 			normalize(WkP, WkP, 0.0, 1.0, NORM_MINMAX);// Normalize to 0-1
 			double numLevels = std::pow(2.0, bitDepth) - 1.0f;// Number of quantization levels (e.g., 255 for 8-bit, 65535 for 16-bit)
 			WkP.convertTo(WkP, CV_64F, numLevels);// Scale to 0-255 (8-bit) or 0-65535 (16-bit)
@@ -2172,15 +2224,34 @@ int main(int argc, char* argv[])
 					COPYtarget_mat_M_256, COPYtarget_mat_S_256,
 					intensity_roi, img_Mst, img_Srv, curSize, histImage);
 			}
-			if (Deff_median_OUT != 0)
+			// Median correction (disabled when the command contains "nomed")
+			const bool useMedian = (inputCom.find("nomed") == std::string::npos);
+			if (useMedian && Deff_median_OUT != 0)
 			{
 				cv::subtract(COPYtarget_mat_S_256, cv::Scalar(Deff_median_OUT), COPYtarget_mat_S_256);
+			}
+
+			// LSQ gain/offset correction (enabled when the command contains "lsq")
+			const bool useLSQ = (inputCom.find("lsq") != std::string::npos);
+			double lsq_a = 1.0, lsq_b = 0.0;
+			double psnr_float = 0.0;
+			if (useLSQ) {
+				cv::Mat S_float, M_float;
+				applyLSQCorrection(COPYtarget_mat_M_256, COPYtarget_mat_S_256, lsq_a, lsq_b, &S_float);
+				COPYtarget_mat_M_256.convertTo(M_float, CV_64F);
+				psnr_float = GetPSNR(M_float, S_float);
+#pragma omp critical(eval)
+				HdataPSNRFloat[NsLoop + 1] = psnr_float;
 			}
 
 			// [Step4]
 #pragma omp critical(console)
 			{
-				std::cout << "Deff_median(" << Deff_median_OUT << ") ";
+				SetConsoleColor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+				std::cout << "Deff_median(" << Deff_median_OUT << (useMedian ? ") " : ",OFF) ");
+				if (useLSQ)
+					std::cout << std::fixed << std::setprecision(4) << "LSQ(a=" << lsq_a
+					<< std::setprecision(2) << ", b=" << lsq_b << ") PSNR(float)=" << psnr_float << "dB ";
 			} //<< std::endl; }
 
 			// evaluateHologram is called as-is (it uses critical internally)
@@ -2208,9 +2279,11 @@ int main(int argc, char* argv[])
 
         // (B) Average aggregation of 8 photos (previously the NsLoop==7 block)
 		aggregatePhotoResults();// Aggregate the results of 8 photos
+		printFloatPSNRAverage(1, Image0to7);
 
 		// (C) Average aggregation of MIT images + imwrite (previously the trailing block)
 		aggregateMITResults(WKKK, FILE_DTOP, inputCom);// Aggregate the results of MIT images
+		printFloatPSNRAverage(Image0to7 + 1, NloopMIT + Image0to7);
 
 		DWORD elapsed = (timeGetTime() - start);
 		std::cout << "t=" << elapsed << "ms.(" << (elapsed / 1000.0) << "sec. " << (elapsed / 60000.0) << "min.) / " << (NloopMIT + Image0to7) << " = " << (elapsed / 1000.0) / (NloopMIT + Image0to7) << "sec[" << 1.0 / ((elapsed / 1000.0) / (NloopMIT + Image0to7)) << "fps]\n";
